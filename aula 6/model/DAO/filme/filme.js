@@ -155,9 +155,6 @@ const deleteFilme = async function(id){
     } catch (error) {
         return false
     }
-
-
-   
 }
 
 

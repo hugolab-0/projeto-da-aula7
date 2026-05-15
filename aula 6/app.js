@@ -15,6 +15,7 @@ const bodyParser    = require('body-parser')
 // Importa a controller de filmes, que contém as regras de negócio (validação, lógica, etc.)
 const controllerFilme = require('./controller/filme/controller_filmes.js')
 const controllerPersonagem = require('./controller/personagem/controller_personagem.js')
+const controllerSexo = require('./controller/sexo/controller_sexo.js')
 
 
 // ======================== CONFIG BODY ========================
@@ -155,6 +156,64 @@ app.get('/v1/senai/locadora/lista/filme/personagem', async function(req, res) {
     res.status(result.status_code)
     res.json(result)
 })
+
+// ======================== ENDPOINTS - SEXO ========================
+
+// INSERT SEXO
+app.post('/v1/senai/locadora/sexo', bodyParserJSON, async function(req, res){
+    let dados = req.body
+    let contentType = req.headers['content-type']
+
+    let result = await controllerSexo.inserirNovosexo(dados, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// SELECT ALL SEXO
+app.get('/v1/senai/locadora/lista/sexo', async function(req, res) {
+    let result = await controllerSexo.listarPersonagens()
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// SELECT SEXO BY ID
+app.get('/v1/senai/locadora/sexo/:id', async function(req, res) {
+    let id = req.params.id
+    
+    let result = await controllerSexo.buscarsexo(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// UPDATE SEXO
+app.put('/v1/senai/locadora/sexo/:id', bodyParserJSON, async function(req, res) {
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+
+    let result = await controllerSexo.atualizarsexo(dados, id, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// DELETE SEXO
+app.delete('/v1/senai/locadora/lista/sexo/:id', async function(req, res) {
+    let id = req.params.id
+
+    let result = await controllerSexo.excluirsexo(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
 // ======================== SERVER ========================
 
 // Inicializa o servidor na porta 8080
