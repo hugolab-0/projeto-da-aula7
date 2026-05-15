@@ -1,34 +1,126 @@
+// Import do knex (conexão com banco)
 const knex = require('knex')
 
-// Import do arquivo de configuração que contém as credenciais e parâmetros de conexão com o banco
+// Configuração do banco
 const knexConfig = require('../../database_config_knex/knexFile.js')
 
-// Cria a conexão com o banco de dados utilizando as configurações do ambiente "development"
+// Conexão com banco
 const knexConex = knex(knexConfig.development)
 
-// função para inserir dados no banco
-const insertNewCaracte = async function() {
+
+// ======================== INSERT ========================
+
+// Insere personagem
+const insertCharacter = async function(Character){
     try {
         
+        let sql = `insert into tbl_personagem(nome)value(
+            '${Character.nome}'
+        );`
+
+        let result = await knexConex.raw(sql)
+
+        if(result)
+            return result[0].insertId
+        else
+            return false
+
     } catch (error) {
-        
+        console.log(error)
+        return false
     }
 }
 
-// função para atulizar alguma informação no banco
-const updateCaracter = async function() {
-    
+
+// ======================== UPDATE ========================
+
+// Atualiza personagem
+const updateCharacter = async function(Character){
+
+    try {
+        let sql = `update tbl_personagem set nome = '${Character.nome}' where id = '${Character.id}';`
+
+        let result = await knexConex.raw(sql)
+
+        if(result) {
+            return true
+        }else{
+            return false
+        }
+        
+    } catch (error) {
+        return false
+    }
 }
 
-// função
-const selectAllCaracters = async function() {
-    
+
+// ======================== SELECT ALL ========================
+
+// Lista todos
+const selectAllCharacter = async function(){
+    try {
+        let sql = `select * from tbl_personagem order by id desc;`
+
+        let result = await knexConex.raw(sql)
+        
+        if(Array.isArray(result)){
+            return result[0]
+        }else{
+            return false
+        }
+    } catch (error) {
+        return false
+    }
 }
 
-const selectByIdCaracter = async function() {
-    
+
+// ======================== SELECT BY ID ========================
+
+// Busca por ID
+const selectByIdCharacter = async function(id){
+    try {
+        let sql =  `select * from tbl_personagem where id=${id};`
+
+        let result = await knexConex.raw(sql)
+
+        if(Array.isArray(result)) {
+            return result[0]
+        }else {
+            return false
+        }
+
+    } catch (error) {
+        return false
+    }
 }
 
-const deleteCaracter = async function() {
-    
+
+// ======================== DELETE ========================
+
+// Deleta por ID
+const deleteCharacter = async function(id){
+
+    try {
+        let sql =  `delete from tbl_personagem where id= ${id};`
+
+        let result = await knexConex.raw(sql)
+
+        if(result) {
+            return true 
+        }else {
+            return false
+        }
+    } catch (error) {
+        return false
+    }
+}
+
+
+// Exportação
+module.exports = {
+    insertCharacter,
+    updateCharacter,
+    selectAllCharacter,
+    selectByIdCharacter,
+    deleteCharacter
 }
