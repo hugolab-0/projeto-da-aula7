@@ -14,7 +14,7 @@ const knexConex = knex(knexConfig.development)
 const insertCharacter = async function(Character){
     try {
         
-        let sql = `insert into tbl_personagem(nome)value(
+        let sql = `insert into tbl_personagem(nome)values(
             '${Character.nome}'
         );`
 

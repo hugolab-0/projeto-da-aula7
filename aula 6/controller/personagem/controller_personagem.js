@@ -69,7 +69,7 @@ const validarDados = async function(personagem) {
 
 // Função de atualização (não implementada)
 const atualizarPersonagem = async function(personagem, id, contentType) {
-    let message = JSON.parse(JSON.stringify(config_message))
+    let message = JSON.parse(JSON.stringify(message_config))
     
         try {
             
@@ -77,7 +77,7 @@ const atualizarPersonagem = async function(personagem, id, contentType) {
             if(String(contentType).toUpperCase() == 'APPLICATION/JSON') {
     
                 // Busca o filme pelo ID antes de atualizar
-                let resultBuscarId = await buscarFilme(id)
+                let resultBuscarId = await buscarPersonagem(id)
     
                 // Se encontrou o filme (status true)
                 if(resultBuscarId.status) {
@@ -87,10 +87,9 @@ const atualizarPersonagem = async function(personagem, id, contentType) {
     
                     // Se não houver erro de validação
                     if(!validar) {
-    
-                        // Adiciona o ID ao objeto filme para enviar ao DAO
-                        filme.id = id
-    
+ 
+                        personagem.id = id
+
                         // Chama o DAO para atualizar os dados no banco
                         let result = await personagemDAO.updateCharacter(personagem)
     

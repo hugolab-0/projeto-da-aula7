@@ -17,30 +17,42 @@ create table tbl_filme(
     capa varchar(255)
 );
 
-create table tbl_sexo(
-# complementos dentro da tabela
-	id int not null primary key auto_increment,
-    nome varchar(80) not null,
-    sigla varchar(4) not null
+CREATE TABLE tbl_personagem (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(40) NOT NULL
 );
 
-delete from tbl_filme where id = 1
-
-desc tbl_filme;
-# mostrar tabela
-show tables;
-
-select * from tbl_filme;
-
-update tbl_filme set 
-		nome = 'filme2',
-        data_lancamento = '2008-01=01',
-        duracao = '02:00',
-        sinopse = 'testando o update',
-        avaliacao = '2',
-        valor = '15',
-        capa = 'teste'
-			where id = 1;
+CREATE TABLE tbl_sexo (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(40) NOT NULL,
+    sigla VARCHAR(4) NOT NULL
+);
 
 
 
+CREATE TABLE tbl_nacionalidade (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL
+);
+
+
+CREATE TABLE tbl_genero (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(45) NOT NULL
+);
+
+
+CREATE TABLE tbl_classificacao (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    classe VARCHAR(45) NOT NULL
+);
+
+
+CREATE TABLE tbl_atividade (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    atividade VARCHAR(100) NOT NULL
+);
+
+insert into tbl_personagem(nome)values(
+            nome = 'teste'
+        );

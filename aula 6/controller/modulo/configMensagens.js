@@ -39,6 +39,12 @@ const SUCESS_CREATED_ITEM = {
     message: 'requisitos inseridos com sucesso'
 } 
 
+const SUCESS_INSERT_ITEM = {
+    status: true, 
+    status_code: 201, 
+    message: 'requisitos inseridos com sucesso'
+} 
+
 
 // ======================== ERRO 500 (MODEL) ========================
 // Usado quando ocorre um erro na camada de model (banco de dados),
@@ -116,6 +122,7 @@ module.exports = {
     ERROR_NOT_FOUND,
     SUCESS_RESPONSE,
     SUCESS_UPDATE_ITEM,
-    SUCESS_DELETE_ITEM
+    SUCESS_DELETE_ITEM,
+    SUCESS_INSERT_ITEM
 
 }
