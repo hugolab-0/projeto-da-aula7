@@ -214,6 +214,64 @@ app.delete('/v1/senai/locadora/lista/sexo/:id', async function(req, res) {
     res.json(result)
 })
 
+
+// ======================== ENDPOINTS - CLASSIFICACAO ========================
+
+// INSERT CLASSIFICACAO
+app.post('/v1/senai/locadora/classificacao', bodyParserJSON, async function(req, res){
+    let dados = req.body
+    let contentType = req.headers['content-type']
+
+    let result = await controllerClassificacao.inserirNovaClassificacao(dados, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// SELECT ALL CLASSIFICACAO
+app.get('/v1/senai/locadora/lista/classificacao', async function(req, res) {
+    let result = await controllerClassificacao.listarClassificacao()
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// SELECT CLASSIFICACAO BY ID
+app.get('/v1/senai/locadora/classificacao/:id', async function(req, res) {
+    let id = req.params.id
+    
+    let result = await controllerClassificacao.buscarClassificacao(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// UPDATE CLASSIFICACAO
+app.put('/v1/senai/locadora/classificacao/:id', bodyParserJSON, async function(req, res) {
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+
+    let result = await controllerClassificacao.atualizarClassificacao(dados, id, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// DELETE CLASSIFICACAO
+app.delete('/v1/senai/locadora/lista/classificacao/:id', async function(req, res) {
+    let id = req.params.id
+
+    let result = await controllerClassificacao.excluirClassificacao(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
 // ======================== SERVER ========================
 
 // Inicializa o servidor na porta 8080

@@ -49,11 +49,9 @@ const inserirNovoFilme = async function(filme, contentType) {
 
                 // Se o DAO retornou sucesso
                 if(result) { // 201 - criado com sucesso
-                    filme.id = id
                     message.DEFAULT_MESSAGE.status = message.SUCESS_CREATED_ITEM.status
                     message.DEFAULT_MESSAGE.status_code = message.SUCESS_CREATED_ITEM.status_code
                     message.DEFAULT_MESSAGE.message = message.SUCESS_CREATED_ITEM.message
-                    message.DEFAULT_MESSAGE.response = filme
                 }
                 else{ 
                     // Erro ao inserir no banco (camada model)
@@ -69,6 +67,7 @@ const inserirNovoFilme = async function(filme, contentType) {
         }
 
     } catch (error) {
+        console.log(error)
         // Caso ocorra algum erro inesperado no controller
         return message.ERROR_INTERNAL_SERVER_CONTROLLER
     }
@@ -307,14 +306,20 @@ const validarDados = async function(filme) {
     }
 
     // Validação do valor (não pode ser vazio, deve ser número e parte inteira até 3 dígitos)
-    else if(filme.valor == '' || filme.valor == null || filme.valor == undefined || filme.valor.split('.')[0].length > 3 || isNaN(filme.valor)) {
+    else if(filme.valor == '' || filme.valor == null || filme.valor == undefined || filme.valor.toString().split('.')[0].length > 3 || isNaN(filme.valor)) {
         message.ERROR_BAD_REQUEST.field = '[VALOR] INVALIDA'
         return message.ERROR_BAD_REQUEST
     }
-
+    
     // Validação da capa (limite de tamanho do campo)
     else if(filme.capa.length > 255){
         message.ERROR_BAD_REQUEST.field = '[CAPA] INVALIDA'
+        return message.ERROR_BAD_REQUEST
+    }
+    
+    // validação para a fk da classificacao
+    else if(filme.id_classificacao == '' || filme.id_classificacao == null || filme.id_classificacao == undefined || isNaN(filme.id_classificacao)) {
+        message.ERROR_BAD_REQUEST.field = '[ID_CLASSIFICACAO] INVALIDO'
         return message.ERROR_BAD_REQUEST
     }else {
         // Se passou por todas as validações, retorna false (sem erro)

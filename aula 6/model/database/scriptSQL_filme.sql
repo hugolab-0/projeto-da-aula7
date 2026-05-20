@@ -14,8 +14,15 @@ create table tbl_filme(
     sinopse text not null,
     avaliacao decimal(3,2) default null,
     valor decimal (5,2) not null default 0,
-    capa varchar(255)
+    capa varchar(255),
+    id_classificacao int not null,
+    
+   constraint FK_FILME_CLASSIFICACAO
+   foreign key (id_classificacao)
+   references tbl_classificacao(id)
+    
 );
+
 
 CREATE TABLE tbl_personagem (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -44,15 +51,14 @@ CREATE TABLE tbl_genero (
 
 CREATE TABLE tbl_classificacao (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    classe VARCHAR(45) NOT NULL
+    sigla varchar(4) not null,
+    nome VARCHAR(45) NOT NULL
 );
-
 
 CREATE TABLE tbl_atividade (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     atividade VARCHAR(100) NOT NULL
 );
 
-insert into tbl_personagem(nome)values(
-            nome = 'teste'
-        );
+select * from tbl_classificacao;
+select * from tbl_filme;

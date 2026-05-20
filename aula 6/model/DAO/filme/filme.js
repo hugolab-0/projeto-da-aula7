@@ -16,23 +16,24 @@ const insertFilme = async function(filme){
         // Monta manualmente a instrução SQL de INSERT utilizando template string
         // Os dados do objeto "filme" são inseridos diretamente na query
         let sql = `insert into tbl_filme (
-                            nome, 
-                            data_lancamento, 
-                            duracao, 
-                            sinopse, 
-                            avaliacao, 
-                            valor, 
-                            capa
-                            )
-                    values (
-                            '${filme.nome}', 
-                            '${filme.data_lancamento}', 
-                            '${filme.duracao}', 
-                            '${filme.sinopse}', 
-                            if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'), 
-                            '${filme.valor}', 
-                            '${filme.capa}'
-                            );`
+            nome,
+            data_lancamento,
+            duracao,
+            sinopse,
+            avaliacao,
+            valor,
+            capa,
+            id_classificacao
+        ) values (
+            '${filme.nome}',
+            '${filme.data_lancamento}',
+            '${filme.duracao}',
+            '${filme.sinopse}',
+            ${filme.avaliacao},
+            ${filme.valor},
+            '${filme.capa}',
+            ${filme.id_classificacao}
+        );`
 
         // Executa o SQL diretamente no banco de dados
         // O "await" faz com que o código espere o banco responder antes de continuar
@@ -67,7 +68,8 @@ const updateFilme = async function(filme){
         sinopse = '${filme.sinopse}', 
         avaliacao = if('${filme.avaliacao}' = '', null, '${filme.avaliacao}'), 
         valor = '${filme.valor}', 
-        capa = '${filme.capa}'
+        capa = '${filme.capa}',
+        id_classificacao = ${filme.id_classificacao}
 
         where id = '${filme.id}';` // atualiza sempre o ID 
 
