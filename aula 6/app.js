@@ -16,6 +16,9 @@ const bodyParser    = require('body-parser')
 const controllerFilme = require('./controller/filme/controller_filmes.js')
 const controllerPersonagem = require('./controller/personagem/controller_personagem.js')
 const controllerSexo = require('./controller/sexo/controller_sexo.js')
+const controllerGenero = require('./controller/genero/controller_genero.js')
+const controllerGenero = require('./controller/atividade/controller_atividade.js')
+const controllerGenero = require('./controller/nacionalidade/controller_nacionalidade.js')
 
 
 // ======================== CONFIG BODY ========================
@@ -55,7 +58,6 @@ app.post('/v1/senai/locadora/filme', bodyParserJSON, async function(req, res){
     res.status(result.status_code)
     res.json(result)
 })
-
 
 // SELECT ALL FILMES
 app.get('/v1/senai/locadora/lista/filme', async function(req, res) {
@@ -271,6 +273,59 @@ app.delete('/v1/senai/locadora/lista/classificacao/:id', async function(req, res
     res.status(result.status_code)
     res.json(result)
 })
+
+// ======================== ENDPOINTS - GENERO ========================
+
+app.post('/v1/senai/locadora/filme/genero', bodyParserJSON, async function(req, res){
+    let dados = req.body
+    let contentType = req.headers['content-type']
+
+    let result = await controllerGenero.inserirNovoGenero(dados, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+app.get('/v1/senai/locadora/filme/listar/genero', async function(req, res) {
+    let result = await controllerGenero.listarGeneros()
+
+    res.status(result.status_code)
+    res.json(result)
+    
+})
+
+app.get('/v1/senai/locadora/filme/buscar/genero', async function(req, res) {
+   let id = req.params.id
+    let result = await controllerGenero.buscarGenero(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+// UPDATE CLASSIFICACAO
+app.put('/v1/senai/locadora/atualizar/genero/:id', bodyParserJSON, async function(req, res) {
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+
+    let result = await controllerGenero.atualizarGenero(dados, id, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// DELETE CLASSIFICACAO
+app.delete('/v1/senai/locadora/deletar/genero/:id', async function(req, res) {
+    let id = req.params.id
+
+    let result = await controllerGenero.excluirGenero(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
 
 // ======================== SERVER ========================
 
