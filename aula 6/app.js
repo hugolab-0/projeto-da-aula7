@@ -18,7 +18,7 @@ const controllerPersonagem = require('./controller/personagem/controller_persona
 const controllerSexo = require('./controller/sexo/controller_sexo.js')
 const controllerGenero = require('./controller/genero/controller_genero.js')
 const controllerAtividade = require('./controller/atividade/controller_atividade.js')
-const controllerGenero = require('./controller/nacionalidade/controller_nacionalidade.js')
+const controllerNacionalidade = require('./controller/nacionalidade/controller_nacionalidade.js')
 
 
 // ======================== CONFIG BODY ========================

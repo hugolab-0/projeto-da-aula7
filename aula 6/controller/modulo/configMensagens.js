@@ -39,6 +39,12 @@ const SUCESS_CREATED_ITEM = {
     message: 'requisitos inseridos com sucesso'
 } 
 
+const SUCESS_CREATED_ITEM_WARNIG = {
+    status: true, 
+    status_code: 201, 
+    message: 'Os dados principais foram inseridso com sucesso, porem alguns dados apresentaram problema.'
+} 
+
 const SUCESS_INSERT_ITEM = {
     status: true, 
     status_code: 201, 
@@ -123,6 +129,7 @@ module.exports = {
     SUCESS_RESPONSE,
     SUCESS_UPDATE_ITEM,
     SUCESS_DELETE_ITEM,
-    SUCESS_INSERT_ITEM
+    SUCESS_INSERT_ITEM,
+    SUCESS_CREATED_ITEM_WARNIG
 
 }
