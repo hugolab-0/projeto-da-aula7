@@ -62,7 +62,7 @@ app.post('/v1/senai/locadora/filme', bodyParserJSON, async function(req, res){
 
 // SELECT ALL FILMES
 app.get('/v1/senai/locadora/lista/filme', async function(req, res) {
-    let result = await controllerFilme.listaFilme()
+    let result = await controllerFilme.listarFilme()
 
     res.status(result.status_code)
     res.json(result)

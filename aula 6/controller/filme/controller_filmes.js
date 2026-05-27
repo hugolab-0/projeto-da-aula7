@@ -1,349 +1,328 @@
-/************
- * Objetivo: Arquivo responsavel pela validação, tratamento 
- *           e manipulação de dados para o CRUD de filmes
- * 
- * data: 17/04/2026
- * autor: Hugo 
- * Versão: 1.0
- *************/
+//Import do arquivo de padronização de mensagens
+const config_message = require('../modulo/configMessages.js')
 
-
-// Importa o objeto que contém todas as mensagens padrão da API,
-// como erros (400, 500, etc.) e mensagens de sucesso.
-// Isso ajuda a padronizar as respostas do sistema.
-const config_message = require('../modulo/configMensagens.js')
-
-// Importa o DAO (Data Access Object), que é responsável por
-// acessar diretamente o banco de dados e executar as operações CRUD.
+//Import do arquivo DAO para fazer o CRUD do filme no banco de dados
 const filmeDAO = require('../../model/DAO/filme/filme.js')
-const controller_filme_genero = require('../filme/controller_filme_genero.js')
 
-// Importação do body-parser (não está sendo utilizado diretamente neste arquivo,
-// mas geralmente serve para trabalhar com requisições JSON no Node.js)
-const { json } = require('body-parser')
+//Import de arquivos de Controller
+const controller_classificacao  = require('../classificacao/controller_classificacao.js')
+const controller_filme_genero   = require('./controller_filme_genero.js')
 
-
-// ======================== INSERT ========================
-// Função responsável por inserir um novo filme no banco
-const inserirNovoFilme = async function(filme, contentType) {
-
-    // Cria uma cópia do objeto de mensagens para evitar alterar o original
+//Função para inserir um novo Filme
+const inserirNovoFilme = async function(filme, contentType){
+   
+    //Criando um clone do objeto JSON para manipular a sua estrutura local sem
+    //modificar a estrutura original
     let message = JSON.parse(JSON.stringify(config_message))
-
+    
     try {
-        
-        // Verifica se o tipo de conteúdo da requisição é JSON
-        // Isso é importante para garantir que os dados estejam no formato correto
-        if(String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+   
+        //Validação para o tipo de dados da requisição (somente JSON)
+        if(String(contentType).toUpperCase() == 'APPLICATION/JSON'){
 
-            // Chama a função de validação dos dados do filme
+            //Validação de dados para os atributos do Filme (Status 400)
             let validar = await validarDados(filme)
 
-            // Se a validação retornar algo, significa que houve erro
-            if(validar) {
-                return validar
-            }else{ 
-                // Se passou na validação, envia os dados para o DAO inserir no banco
+            //Se a função validar retornar um Json de erro, iremos devolver ao 
+            // APP o erro
+            if(validar){
+                return validar //400
+            }else{
+                //Encaminha os dados do filme para o DAO
                 let result = await filmeDAO.insertFilme(filme)
-                // Se o DAO retornou sucesso
-                if(result) { 
-                    filme.id = result 
-                    for(genero of  filme.genero){
-                    // manipulação dos dados par inserir os generos de filme
-                    let filmeGenero = {
-                        "id_filme": filme.id,
-                        "id_genero": genero.id
-                    }
-                    let resultInserirGenero = await controller_filme_genero.inserirFilmeGenero(filmeGenero)
-                    
-                    if (!resultInserirGenero.status) {
-                        return message.SUCESS_CREATED_ITEM_WARNIG
-                    }
-                }
 
-                    message.DEFAULT_MESSAGE.status = message.SUCESS_CREATED_ITEM.status
-                    message.DEFAULT_MESSAGE.status_code = message.SUCESS_CREATED_ITEM.status_code
-                    message.DEFAULT_MESSAGE.message = message.SUCESS_CREATED_ITEM.message
-                }
-                else{ 
-                    // Erro ao inserir no banco (camada model)
-                    return  message.ERROR_INTERNAL_SERVER_MODEL
-                }
+                if(result){ //201
+                    //Criando o atributo ID no JSON do filme e colocando
+                    // o ID gerado após o insert
+                    filme.id = result
+                     
+                    //Manipulação de dados para inserir os Generos do Filme
+                    for (genero of filme.genero){
+                       //Cria o objeto JSON com os ids do filme e do genero
+                        let filmeGenero = { "id_filme": filme.id, 
+                                            "id_genero": genero.id
+                                        }
+                        //Chama a controller do filme genero para inserir os IDs                                        
+                        let resultInsertGenero = await controller_filme_genero.inserirNovoFilmeGenero(filmeGenero)
+                        
+                        if(!resultInsertGenero.status){
+                            return message.SUCCESS_CREATED_ITEM_WARNIG //201 com alerta de dados não inseridos
+                        }
 
-                // Retorna a resposta padrão de sucesso
+                    }
+
+                    message.DEFAULT_MESSAGE.status = message.SUCCESS_CREATED_ITEM.status
+                    message.DEFAULT_MESSAGE.status_code = message.SUCCESS_CREATED_ITEM.status_code
+                    message.DEFAULT_MESSAGE.message = message.SUCCESS_CREATED_ITEM.message
+                    message.DEFAULT_MESSAGE.response = filme
+                }else{ //500
+                    return message.ERROR_INTERNAL_SERVER_MODEL //500 (model)
+                }
                 return message.DEFAULT_MESSAGE
             }
-        }else {
-            // Caso o content-type não seja JSON
-            return message.ERROR_CONTENT_TYPE
-        }
-
-    } catch (error) {
-        console.log(error)
-        // Caso ocorra algum erro inesperado no controller
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER
-    }
-}
-
-
-// ======================== UPDATE ========================
-// Função responsável por atualizar um filme existente
-const atualizarFilme = async function(filme, id, contentType) {
-
-    // Clona as mensagens padrão
-    let message = JSON.parse(JSON.stringify(config_message))
-
-    try {
-        
-        // Verifica o content-type
-        if(String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-
-            // Busca o filme pelo ID antes de atualizar
-            let resultBuscarId = await buscarFilme(id)
-
-            // Se encontrou o filme (status true)
-            if(resultBuscarId.status) {
-
-                // Valida os novos dados enviados
-                let validar = await validarDados(filme)
-
-                // Se não houver erro de validação
-                if(!validar) {
-
-                    // Adiciona o ID ao objeto filme para enviar ao DAO
-                    filme.id = id
-
-                    // Chama o DAO para atualizar os dados no banco
-                    let result = await filmeDAO.updateFilme(filme)
-
-                    // Se atualizou com sucesso
-                    if(result) {
-                        message.DEFAULT_MESSAGE.status = message.SUCESS_UPDATE_ITEM.status
-                        message.DEFAULT_MESSAGE.status_code = message.SUCESS_UPDATE_ITEM.status_code
-                        message.DEFAULT_MESSAGE.message = message.SUCESS_UPDATE_ITEM.message
-
-                        return message.DEFAULT_MESSAGE
-                    }else {
-                        // Erro no banco
-                        return message.ERROR_INTERNAL_SERVER_MODEL
-                    }
-
-                }else {
-                    // Retorna erro de validação
-                    return validar
-                }
-
-            }else {
-                // Retorna erro da busca (filme não encontrado ou erro)
-                return resultBuscarId
-            }
-        }else {
-            // Content-type inválido
+        }else{
             return message.ERROR_CONTENT_TYPE //415
         }
-
     } catch (error) {
-        // Erro inesperado no controller
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER
-        
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
     }
-    
 }
 
-
-// ======================== SELECT ALL ========================
-// Função responsável por listar todos os filmes
-const listaFilme = async function() {
-
-    // Clona as mensagens
+//Função para atualizar um filme
+const atualizarFilme = async function(filme, id, contentType)
+{
     let message = JSON.parse(JSON.stringify(config_message))
 
     try {
-        // Chama o DAO para buscar todos os filmes
+        //Validação do Contenty type para receber apenas JSON
+        if(String(contentType).toUpperCase() == 'APPLICATION/JSON'){
+            //Validação para o ID incorreto
+            let resultBuscarID = await buscarFilme(id)
+
+            //Se a função buscar encontrar o filme o atributo status do JSON será verdadeiro
+            //Isso significa que o filme existe na base, caso não retorne true, então 
+            //o retorno da função poderá ser um 400 ou 404 ou até mesmo um 500
+            if(resultBuscarID.status){
+                let validar = await validarDados(filme)
+
+                //Validação de campos obrigatórios para a atualização (Body)
+                if(!validar){
+                    //Adiciono o atributo ID do filme no JSON para ser enviado ao DAO
+                    filme.id = id
+
+                    //Chama a função do DAO para atualizar o Filme (dados e o ID)
+                    let result = await filmeDAO.updateFilme(filme)
+
+                    if(result){
+
+                        //Manipulação de dados na tabela de relação entre filme e genero
+                        let resultDeleteGenero = await controller_filme_genero.excluirGenerosIdFilme(filme.id)
+
+                        //Após a exclusão de todos os generos relacionados com o filme
+                        if(resultDeleteGenero.status){
+                            //Manipulação de dados para inserir os Generos do Filme
+                            for (genero of filme.genero){
+                                //Cria o objeto JSON com os ids do filme e do genero
+                                let filmeGenero = { "id_filme": filme.id, 
+                                                    "id_genero": genero.id
+                                                }
+                                //Chama a controller do filme genero para inserir os IDs                                        
+                                let resultInsertGenero = await controller_filme_genero.inserirNovoFilmeGenero(filmeGenero)
+                                
+                                if(!resultInsertGenero.status){
+                                    return message.SUCCESS_CREATED_ITEM_WARNIG //201 com alerta de dados não inseridos
+                                }
+        
+                            }
+ 
+                        }
+
+                        message.DEFAULT_MESSAGE.status      = message.SUCCESS_UPDATED_ITEM.status
+                        message.DEFAULT_MESSAGE.status_code = message.SUCCESS_UPDATED_ITEM.status_code
+                        message.DEFAULT_MESSAGE.message     = message.SUCCESS_UPDATED_ITEM.message
+                        message.DEFAULT_MESSAGE.response    = filme
+                         
+                        return message.DEFAULT_MESSAGE //200 (Atualizado)
+
+                    }else{
+                        return message.ERROR_INTERNAL_SERVER_MODEL //500
+                    }
+
+                }else{
+                    return validar //400
+                }
+            }else{
+                return resultBuscarID //400 ou 404 ou 500
+            }
+
+            
+        }else{
+            return message.ERROR_CONTENT_TYPE //415
+        }
+    } catch (error) {
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500 (Controller)
+    }
+}
+
+//Função para retornar todos os filmes
+const listarFilme = async function(){
+    
+    //Criando um clone do objeto JSON para manipular a sua estrutura local sem
+    //modificar a estrutura original
+    let message = JSON.parse(JSON.stringify(config_message))
+
+    try {
+        //Chama a função do DAO para retornar a lista de todos os filmes
         let result = await filmeDAO.selectAllFilme()
 
-        // Verifica se houve retorno
-        if(result) {
-            if(result.length > 0) {
+        //Validação para verificar se o DAO conseguiu processar os dados
+        if(result){
+            //Validação para verificar se existe conteúdo no array
+            if(result.length > 0){
 
-                // Define status de sucesso
-                message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
-                message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
+                //Percorre o ARRAY de filmes para identificar os dados da classificação
+                for(filme of result){
+                    //Busca na controller da classificação o ID referente aos dados
+                    let resultClassificacao = await controller_classificacao.buscarClassificacao(filme.id_classificacao)
+                    //Se a classificação foi encontrada
+                    if(resultClassificacao.status){
+                        //Cria o atributo classificacao no filme e adiciona os dados referente
+                        // a classificacao
+                        filme.classificacao = resultClassificacao.response.classificacao
+                        //Apaga o atributo id_classificacao do filme para não ficar repetido
+                        delete filme.id_classificacao
+                    }
 
-                // Define quantidade de registros encontrados
-                // OBS: este valor é sobrescrito na linha abaixo
-                message.DEFAULT_MESSAGE.response.result = result.length
+                    //Cria o objeto de Generos relacionados ao Filme
+                    let resultGenero = await controller_filme_genero.buscarGeneroIdFilme(filme.id)
+                    
+                    if(resultGenero.status){
+                        filme.genero = resultGenero.response.filme_genero
+                    }
+                }
 
-                // Define os dados retornados (lista de filmes)
-                message.DEFAULT_MESSAGE.response.result = result
+                message.DEFAULT_MESSAGE.status = message.SUCCESS_RESPONSE.status
+                message.DEFAULT_MESSAGE.status_code = message.SUCCESS_RESPONSE.status_code
+                message.DEFAULT_MESSAGE.response.count = result.length
+                message.DEFAULT_MESSAGE.response.filme = result
 
-                return message.DEFAULT_MESSAGE
-
-            }else {
-                // Nenhum filme encontrado
-                return message.ERROR_NOT_FOUND
+                return message.DEFAULT_MESSAGE //200 (Dados do Filme)
+            }else{
+                return message.ERROR_NOT_FOUND //404
             }
-
-        }else {
-            // Erro ao acessar o banco
-            return message.ERROR_INTERNAL_SERVER_MODEL
+        }else{
+            return message.ERROR_INTERNAL_SERVER_MODEL //500 (model)
         }
     } catch (error) {
-        // Erro no controller
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
     }
-    
 }
 
-const deletarFilme = async function(id) {
-      // Clona as mensagens padrão
-      let message = JSON.parse(JSON.stringify(config_message))
-
-      try {
-
-        let resultValidarID= await buscarFilme(id)
-
-        if(resultValidarID.status) {
-
-            let result = await filmeDAO.deleteFilme(id)
-
-            if(result) {
-                message.DEFAULT_MESSAGE.status = message.SUCESS_DELETE_ITEM.status
-                message.DEFAULT_MESSAGE.status_code = message.SUCESS_DELETE_ITEM.status_code
-                message.DEFAULT_MESSAGE.message = message.SUCESS_DELETE_ITEM.message
-
-                return message.DEFAULT_MESSAGE
-            }else {
-                return message.ERROR_BAD_REQUEST
-            }
-
-        }else {
-            return resultValidarID
-        }
-      } catch (error) {
-        return false
-      }
+//Função para buscar um filme pelo ID
+const buscarFilme = async function(id){
     
-}
-
-// ======================== SELECT BY ID ========================
-// Função para buscar um filme específico pelo ID
-const buscarFilme = async function(id) {
-
-    // Clona as mensagens
+    //Criando um clone do objeto JSON para manipular a sua estrutura local sem
+    //modificar a estrutura original
     let message = JSON.parse(JSON.stringify(config_message))
-
+    
     try {
-        // Valida o ID recebido
-        if(id == '' || id == null || id == undefined || isNaN(id)) {
-
-            // Define qual campo está inválido
-            message.ERROR_BAD_REQUEST.field = '[ID] INVALIDO'
-
+        //Validaçção para garantir que o ID seja válido
+        if(id == undefined || id == '' || id == null ||  isNaN(id)){
+            message.ERROR_BAD_REQUEST.field = '[ID] INVÁLIDO'
             return message.ERROR_BAD_REQUEST //400
-
         }else{
-            // Busca o filme no banco pelo ID
             let result = await filmeDAO.selectByIdFilme(id)
 
-            // Exibe no console para debug (visualizar retorno do banco)
-            console.log(result)
+            if(result){
+                if(result.length > 0){
 
-            // Verifica se o DAO retornou algo
-            if(result) {
-                if(result.length > 0) {
+                        //Percorre o ARRAY de filmes para identificar os dados da classificação
+                        for(filme of result){
+                            //Busca na controller da classificação o ID referente aos dados
+                            let resultClassificacao = await controller_classificacao.buscarClassificacao(filme.id_classificacao)
+                            //Se a classificação foi encontrada
+                            if(resultClassificacao.status){
+                                //Cria o atributo classificacao no filme e adiciona os dados referente
+                                // a classificacao
+                                filme.classificacao = resultClassificacao.response.classificacao
+                                //Apaga o atributo id_classificacao do filme para não ficar repetido
+                                delete filme.id_classificacao
+                            }
 
-                    // Preenche resposta de sucesso
-                    message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
-                    message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
+                            //Cria o objeto de Generos relacionados ao Filme
+                            let resultGenero = await controller_filme_genero.buscarGeneroIdFilme(filme.id)
+                            if(resultGenero.status){
+                                filme.genero = resultGenero.response.filme_genero
+                            }
+                        }
+
+                    message.DEFAULT_MESSAGE.status = message.SUCCESS_RESPONSE.status
+                    message.DEFAULT_MESSAGE.status_code = message.SUCCESS_RESPONSE.status_code
                     message.DEFAULT_MESSAGE.response.filme = result
 
-                    return message.DEFAULT_MESSAGE
-                }else {
-                    // Filme não encontrado
-                    return message.ERROR_NOT_FOUND
+                    return message.DEFAULT_MESSAGE //200
+                }else{
+                    return message.ERROR_NOT_FOUND //404
                 }
-            }else {
-                // Erro no banco
-                return message.ERROR_INTERNAL_SERVER_MODEL
+            }else{
+                return message.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
             }
         }
-        
     } catch (error) {
-        // Erro inesperado no controller
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
-    
 }
 
+//Função para excluir um filme
+const excluirFilme = async function(id){
 
+    let message = JSON.parse(JSON.stringify(config_message))
+    
+    try {
+        //Validação do erro 400 e 404
+        let resultBuscarID = await buscarFilme(id)
 
-// ======================== VALIDAÇÃO ========================
-// Função responsável por validar todos os campos do filme antes de inserir/atualizar
-const validarDados = async function(filme) {
+        //Validação para verificar se o status é verdadeiro(se existe o filme)
+        if(resultBuscarID.status){
+            //Chamar a função do DAO para excluir o filme
+            let result = await filmeDAO.deleteFilme(id)
 
-    // Clona as mensagens
+            if(result){
+                return message.SUCCESS_DELETED_ITEM //200 (Registro excluído)
+            }else{
+                return message.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
+            }
+        }else{
+            return resultBuscarID //400 ou 404
+        }
+    } catch (error) {
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER //500 (controller)
+    }
+}
+
+//Função para validar todos os dados de filme 
+// (obrigatórios, qtde de caracteres, etc)
+const validarDados = async function(filme){
+
+    // console.log(filme.valor.split('.')[0].length)
+    //Cria um clone da const de mensagebs
     let message = JSON.parse(JSON.stringify(config_message))
 
-    // ======================== VALIDAÇÕES ========================
-
-    // Validação do nome (não pode ser vazio, nulo, undefined ou maior que 80 caracteres)
-    if(filme.nome == '' || filme.nome == null || filme.nome.length > 80 || filme.nome == undefined) {
-        message.ERROR_BAD_REQUEST.field =  '[NOME] INVALIDO'
-        return message.ERROR_BAD_REQUEST
-    }
-
-    // Validação da data de lançamento (espera formato tipo YYYY-MM-DD com 10 caracteres)
-    else if(filme.data_lancamento == undefined || filme.data_lancamento.length != 10 || filme.data_lancamento == null || filme.data_lancamento == '') {
-        message.ERROR_BAD_REQUEST.field = '[DATA_LANCAMENTO] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
-
-    // Validação da duração (mínimo de 5 caracteres, ex: "02:30")
-    else if(filme.duracao == '' || filme.duracao == null || filme.duracao == undefined || filme.duracao.length < 5) {
-        message.ERROR_BAD_REQUEST.field = '[DURACAO] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
-
-    // Validação da sinopse (não pode ser vazia ou nula)
-    else if(filme.sinopse == '' || filme.sinopse == null || filme.sinopse == undefined ) {
-        message.ERROR_BAD_REQUEST.field = '[SINOPSE] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
-
-    // Validação da avaliação (deve ser número e com no máximo 3 caracteres)
-    else if(isNaN(filme.avaliacao) || filme.avaliacao.length > 3) {
-        message.ERROR_BAD_REQUEST.field = '[AVALIACAO] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
-
-    // Validação do valor (não pode ser vazio, deve ser número e parte inteira até 3 dígitos)
-    else if(filme.valor == '' || filme.valor == null || filme.valor == undefined || filme.valor.toString().split('.')[0].length > 3 || isNaN(filme.valor)) {
-        message.ERROR_BAD_REQUEST.field = '[VALOR] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
+    if(filme.nome == undefined || filme.nome == '' || filme.nome == null || filme.nome.length > 80){
+        message.ERROR_BAD_REQUEST.field = '[NOME] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(filme.data_lancamento == undefined || filme.data_lancamento == '' || filme.data_lancamento == null ||  filme.data_lancamento.length != 10){
+        message.ERROR_BAD_REQUEST.field = '[DATA_LANCAMENTO] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(filme.duracao == undefined || filme.duracao == '' || filme.duracao == null ||  filme.duracao.length < 5){
+        message.ERROR_BAD_REQUEST.field = '[DURACAO] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(filme.sinopse == undefined || filme.sinopse == '' || filme.sinopse == null){
+        message.ERROR_BAD_REQUEST.field = '[SINOPSE] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(isNaN(filme.avaliacao) || filme.avaliacao.length > 3){
+        message.ERROR_BAD_REQUEST.field = '[AVALIAÇÃO] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(filme.valor == undefined || filme.valor == '' || filme.valor == null ||  filme.valor.split('.')[0].length > 3 || isNaN(filme.valor)){
+        message.ERROR_BAD_REQUEST.field = '[VALOR] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else if(filme.capa.length > 255){
+        message.ERROR_BAD_REQUEST.field = '[CAPA] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
     
-    // Validação da capa (limite de tamanho do campo)
-    else if(filme.capa.length > 255){
-        message.ERROR_BAD_REQUEST.field = '[CAPA] INVALIDA'
-        return message.ERROR_BAD_REQUEST
-    }
-    
-    // validação para a fk da classificacao
-    else if(filme.id_classificacao == '' || filme.id_classificacao == null || filme.id_classificacao == undefined || isNaN(filme.id_classificacao)) {
-        message.ERROR_BAD_REQUEST.field = '[ID_CLASSIFICACAO] INVALIDO'
-        return message.ERROR_BAD_REQUEST
-    }else {
-        // Se passou por todas as validações, retorna false (sem erro)
+    //Validação para a FK da classificação
+    }else if(filme.id_classificacao == undefined || filme.id_classificacao == '' || filme.id_classificacao == null || isNaN(filme.id_classificacao) || filme.id_classificacao <=0){
+        message.ERROR_BAD_REQUEST.field = '[ID_CLASSIFICAÇÃO] INVÁLIDO'
+        return message.ERROR_BAD_REQUEST //400
+    }else{
         return false
     }
 }
 
-// Exporta as funções para serem utilizadas em outros arquivos (ex: controller ou rotas)
 module.exports = {
     inserirNovoFilme,
+    listarFilme,
     buscarFilme,
-    listaFilme,
     atualizarFilme,
-    deletarFilme
+    excluirFilme
 }

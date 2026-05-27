@@ -1,5 +1,5 @@
 // Import do arquivo de padronização de mensagens (respostas padrão da aplicação)
-const message_config = require('../modulo/configMensagens.js')
+const message_config = require('../modulo/configMessages.js')
 
 // Import do DAO de personagem (responsável por acessar o banco)
 const personagemDAO = require('../../model/DAO/personagem/personagem.js')

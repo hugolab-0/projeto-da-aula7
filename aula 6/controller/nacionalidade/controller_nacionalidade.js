@@ -1,5 +1,5 @@
 // Import do arquivo de padronização de mensagens
-const message_config = require('../modulo/configMensagens.js')
+const message_config = require('../modulo/configMessages.js')
 
 // Import do DAO de nacionalidade
 const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js')
