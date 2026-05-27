@@ -128,18 +128,7 @@ const selectByIdFilme = async function(id) {
 const deleteFilme = async function(id) {
 
     try {
-
-        // Primeiro remove os relacionamentos do filme
-        // na tabela tbl_filme_genero
-        let sqlRelacionamento = `
-            delete from tbl_filme_genero
-            where id_filme = ${id}
-        `
-
-        await knexConex.raw(sqlRelacionamento)
-
-
-        // Depois remove o filme da tabela principal
+        // remove o filme da tabela principal
         let sql = `
             delete from tbl_filme
             where id = ${id}

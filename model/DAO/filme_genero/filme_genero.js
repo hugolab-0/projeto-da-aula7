@@ -148,9 +148,9 @@ const selectByIdFilme = async function(idFilme) {
 
 
 //Função para excluir uma atividade pelo ID
-const deleteGenero = async function(id) {
+const deleteGenero = async function(idGenero) {
     try {
-        let sql = `delete from tbl_filme_genero where id=${id}`
+        let sql = `delete from tbl_filme_genero where id=${idGenero}`
 
         let result = await knexConex.raw(sql)
 

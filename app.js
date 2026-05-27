@@ -523,5 +523,5 @@ app.delete('/v1/senai/filme/genero/:id', async function(request, response) {
 app.listen(PORT, function() {
 
     // Exibe mensagem no terminal
-    console.log(`Servidor rodando na porta ${PORT}`)
+    console.log(`API pronta para uso`)
 })

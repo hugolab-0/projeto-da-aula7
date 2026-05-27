@@ -55,7 +55,7 @@ const atualizarClassificacao = async function(classificacao, id, contentType){
    
     try {
         //Validação do contente type para receber apenas Json
-        // ✅ Consistente e funciona com charset
+
         if(String(contentType).includes('application/json')){
 
             //Validação para o ID correto

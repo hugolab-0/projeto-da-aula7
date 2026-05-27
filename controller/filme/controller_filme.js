@@ -9,6 +9,8 @@ const controller_classificacao = require('../classificacao/controller_classifica
 
 const controller_filme_genero = require('./controller_filme_genero.js')
 
+
+
 const inserirNovoFilme = async function (filme, contentType){
 
     let message = JSON.parse(JSON.stringify(message_config))
@@ -70,7 +72,6 @@ const atualizarFilme = async function (filme, id, contentType){
 
     try {
         //Validação do contente type para receber apenas Json
-        // ✅ Consistente e funciona com charset
         if(String(contentType).includes('application/json')){
 
             //Validação para o ID correto
