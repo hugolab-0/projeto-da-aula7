@@ -199,6 +199,7 @@ const excluirGenero = async function(id) {
             return resultValidarID
         }
      } catch (error) {
+        console.log(error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER
      }
 }

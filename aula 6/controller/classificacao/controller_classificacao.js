@@ -209,6 +209,7 @@ const excluirClassificacao = async function(id) {
         }
 
     } catch (error) {
+        console.log(error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
