@@ -295,7 +295,7 @@ app.get('/v1/senai/locadora/filme/listar/genero', async function(req, res) {
     
 })
 
-app.get('/v1/senai/locadora/filme/buscar/genero', async function(req, res) {
+app.get('/v1/senai/locadora/filme/buscar/genero/:id', async function(req, res) {
    let id = req.params.id
     let result = await controllerGenero.buscarGenero(id)
 
@@ -347,7 +347,7 @@ app.get('/v1/senai/locadora/filme/listar/atividade', async function(req, res) {
     
 })
 
-app.get('/v1/senai/locadora/filme/buscar/atividade', async function(req, res) {
+app.get('/v1/senai/locadora/filme/buscar/atividade/:id', async function(req, res) {
    let id = req.params.id
     let result = await controllerAtividade.buscarAtividade(id)
 
