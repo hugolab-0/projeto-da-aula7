@@ -16,6 +16,7 @@ const config_message = require('../modulo/configMensagens.js')
 // Importa o DAO (Data Access Object), que é responsável por
 // acessar diretamente o banco de dados e executar as operações CRUD.
 const filmeDAO = require('../../model/DAO/filme/filme.js')
+const controller_filme_genero = require('../filme/controller_filme_genero.js')
 
 // Importação do body-parser (não está sendo utilizado diretamente neste arquivo,
 // mas geralmente serve para trabalhar com requisições JSON no Node.js)
@@ -44,11 +45,22 @@ const inserirNovoFilme = async function(filme, contentType) {
             }else{ 
                 // Se passou na validação, envia os dados para o DAO inserir no banco
                 let result = await filmeDAO.insertFilme(filme)
-
-                
-
                 // Se o DAO retornou sucesso
-                if(result) { // 201 - criado com sucesso
+                if(result) { 
+                    filme.id = result 
+                    for(genero of  filme.genero){
+                    // manipulação dos dados par inserir os generos de filme
+                    let filmeGenero = {
+                        "id_filme": filme.id,
+                        "id_genero": genero.id
+                    }
+                    let resultInserirGenero = await controller_filme_genero.inserirFilmeGenero(filmeGenero)
+                    
+                    if (!resultInserirGenero.status) {
+                        return message.SUCESS_CREATED_ITEM_WARNIG
+                    }
+                }
+
                     message.DEFAULT_MESSAGE.status = message.SUCESS_CREATED_ITEM.status
                     message.DEFAULT_MESSAGE.status_code = message.SUCESS_CREATED_ITEM.status_code
                     message.DEFAULT_MESSAGE.message = message.SUCESS_CREATED_ITEM.message
@@ -326,7 +338,6 @@ const validarDados = async function(filme) {
         return false
     }
 }
-
 
 // Exporta as funções para serem utilizadas em outros arquivos (ex: controller ou rotas)
 module.exports = {

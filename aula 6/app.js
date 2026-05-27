@@ -18,8 +18,8 @@ const controllerPersonagem = require('./controller/personagem/controller_persona
 const controllerSexo = require('./controller/sexo/controller_sexo.js')
 const controllerGenero = require('./controller/genero/controller_genero.js')
 const controllerClassificacao = require('./controller/classificacao/controller_classificacao.js')
-// const controllerGenero = require('./controller/atividade/controller_atividade.js')
-// const controllerGenero = require('./controller/nacionalidade/controller_nacionalidade.js')
+const controllerAtividade = require('./controller/atividade/controller_atividade.js')
+const controllerNacionalidade = require('./controller/nacionalidade/controller_nacionalidade.js')
 
 
 // ======================== CONFIG BODY ========================
@@ -326,6 +326,57 @@ app.delete('/v1/senai/locadora/deletar/genero/:id', async function(req, res) {
     res.json(result)
 })
 
+// ======================== ATIVIDADE ========================
+
+
+app.post('/v1/senai/locadora/filme/ator/atividade', bodyParserJSON, async function(req, res){
+    let dados = req.body
+    let contentType = req.headers['content-type']
+
+    let result = await controllerAtividade.inserirNovaAtividade(dados, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+app.get('/v1/senai/locadora/filme/listar/atividade', async function(req, res) {
+    let result = await controllerAtividade.listarAtividades()
+
+    res.status(result.status_code)
+    res.json(result)
+    
+})
+
+app.get('/v1/senai/locadora/filme/buscar/atividade', async function(req, res) {
+   let id = req.params.id
+    let result = await controllerAtividade.buscarAtividade(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+// UPDATE CLASSIFICACAO
+app.put('/v1/senai/locadora/atualizar/atividade/:id', bodyParserJSON, async function(req, res) {
+    let contentType = req.headers['content-type']
+    let id = req.params.id
+    let dados = req.body
+
+    let result = await controllerAtividade.atualizarAtividade(dados, id, contentType)
+
+    res.status(result.status_code)
+    res.json(result)
+})
+
+
+// DELETE CLASSIFICACAO
+app.delete('/v1/senai/locadora/deletar/atividade/:id', async function(req, res) {
+    let id = req.params.id
+
+    let result = await controllerAtividade.excluirAtividade(id)
+
+    res.status(result.status_code)
+    res.json(result)
+})
 
 
 // ======================== SERVER ========================

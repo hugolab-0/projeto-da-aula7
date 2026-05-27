@@ -1,8 +1,9 @@
+// INSERT
 // Import do arquivo de padronização de mensagens
 const message_config = require('../modulo/configMensagens.js')
 
-// Import do DAO de nacionalidade
-const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js')
+// Import do DAO de genero
+const filmeGeneroDAO = require('../../model/DAO/filme_genero/filme_genero.js')
 
 
 // =========================
@@ -10,17 +11,16 @@ const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js
 // =========================
 
 // INSERT
-const inserirNovaNacionalidade = async function(nacionalidade, contentType) {
+const inserirFilmeGenero = async function(filmeGenero) {
     let message = JSON.parse(JSON.stringify(message_config))
 
     try{
-        if(String(contentType).toUpperCase() == 'APPLICATION/JSON') {
-            let validar = await validarDados(nacionalidade)
+            let validar = await validarDados(filmeGenero)
 
             if(validar) {
                 return validar
             }else{ 
-                let result = await nacionalidadeDAO.insertNacionalidade(nacionalidade)
+                let result = await filmeGeneroDAO.insertFilmeGenero(filmeGenero)
 
                 if(result) {
                     message.DEFAULT_MESSAGE.status = message.SUCESS_INSERT_ITEM.status
@@ -31,23 +31,24 @@ const inserirNovaNacionalidade = async function(nacionalidade, contentType) {
                     return message.ERROR_INTERNAL_SERVER_MODEL
                 }
                 return message.DEFAULT_MESSAGE
-            }
-
-        }else {
-            return message.ERROR_CONTENT_TYPE
+            
         }
     } catch (error) {
+        console.log(error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
 
 
 // VALIDAÇÃO
-const validarDados = async function(nacionalidade) {
+const validarDados = async function(filmeGenero) {
     let message = JSON.parse(JSON.stringify(message_config))
 
-    if(nacionalidade.nome == '' || nacionalidade.nome == null || nacionalidade.nome == undefined || nacionalidade.nome.length > 50) {
-        message.ERROR_BAD_REQUEST.field = '[NOME] INVALIDO'
+    if(filmeGenero.id_filme == '' || filmeGenero.id_filme == null || filmeGenero.id_filme == undefined || isNaN(filmeGenero.id_filme)) {
+        message.ERROR_BAD_REQUEST.field = '[ID_FILME] INVALIDO'
+        return message.ERROR_BAD_REQUEST
+    }if(filmeGenero.id_genero == '' || filmeGenero.id_genero == null || filmeGenero.id_genero == undefined || isNaN(filmeGenero.id_genero)) {
+        message.ERROR_BAD_REQUEST.field = '[ID_GENERO] INVALIDO'
         return message.ERROR_BAD_REQUEST
     }else {
         return false
@@ -56,25 +57,25 @@ const validarDados = async function(nacionalidade) {
 
 
 // UPDATE
-const atualizarNacionalidade = async function(nacionalidade, id, contentType) {
+const atualizarFilmeGenero = async function(filmeGenero, id) {
 
     let message = JSON.parse(JSON.stringify(message_config))
     
     try {
         
-        if(String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+       
 
-            let resultBuscarId = await buscarNacionalidade(id)
+            let resultBuscarId = await buscarFilmeGenero(id)
 
             if(resultBuscarId.status) {
 
-                let validar = await validarDados(nacionalidade)
+                let validar = await validarDados(filmeGenero)
 
                 if(!validar) {
 
-                    nacionalidade.id = id
+                    filmeGenero.id = id
 
-                    let result = await nacionalidadeDAO.updateNacionalidade(nacionalidade)
+                    let result = await filmeGeneroDAO.updateFilmeGenero(filmeGenero, id)
 
                     if(result) {
                         message.DEFAULT_MESSAGE.status = message.SUCESS_UPDATE_ITEM.status
@@ -93,9 +94,6 @@ const atualizarNacionalidade = async function(nacionalidade, id, contentType) {
             }else {
                 return resultBuscarId
             }
-        }else {
-            return message.ERROR_CONTENT_TYPE
-        }
 
     } catch (error) {
         console.log(error)
@@ -105,11 +103,11 @@ const atualizarNacionalidade = async function(nacionalidade, id, contentType) {
 
 
 // SELECT ALL
-const listarNacionalidades = async function() {
+const listarFilmeGeneros = async function() {
     let message = JSON.parse(JSON.stringify(message_config))
 
     try {
-        let result = await nacionalidadeDAO.selectAllNacionalidades()
+        let result = await filmeGeneroDAO.selectAllFilmeGeneros()
 
         if(result) {
             if(result.length > 0) {
@@ -134,7 +132,7 @@ const listarNacionalidades = async function() {
 
 
 // SELECT BY ID
-const buscarNacionalidade = async function(id) {
+const buscarFilmeGenero = async function(id) {
 
     let message = JSON.parse(JSON.stringify(message_config))
     
@@ -147,14 +145,14 @@ const buscarNacionalidade = async function(id) {
 
         }else{
 
-            let result = await nacionalidadeDAO.selectByIdNacionalidade(id)
+            let result = await filmeGeneroDAO.selectByIdFilmeGenero(id)
 
             if(result) {
                 if(result.length > 0) {
 
                     message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
                     message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
-                    message.DEFAULT_MESSAGE.response.nacionalidade = result
+                    message.DEFAULT_MESSAGE.response.genero = result
 
                     return message.DEFAULT_MESSAGE
                 }else {
@@ -170,19 +168,90 @@ const buscarNacionalidade = async function(id) {
     }
 }
 
-
-// DELETE
-const excluirNacionalidade = async function(id) {
+const buscarFilmeIdGenero = async function(idGenero) {
 
     let message = JSON.parse(JSON.stringify(message_config))
     
     try {
 
-        let resultValidarID = await buscarNacionalidade(id)
+        if(idGenero == '' || idGenero == null || idGenero == undefined || isNaN(idGenero)) {
+
+            message.ERROR_BAD_REQUEST.field = '[ID] INVALIDO'
+            return message.ERROR_BAD_REQUEST
+
+        }else{
+
+            let result = await filmeGeneroDAO.selectByIdGenero(id)
+
+            if(result) {
+                if(result.length > 0) {
+
+                    message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
+                    message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
+                    message.DEFAULT_MESSAGE.response.genero = result
+
+                    return message.DEFAULT_MESSAGE
+                }else {
+                    return message.ERROR_NOT_FOUND
+                }
+            }else {
+                return message.ERROR_INTERNAL_SERVER_MODEL
+            }
+        }
+        
+    } catch (error) {
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
+const buscarGeneroIdFilme = async function(idGenero) {
+
+    let message = JSON.parse(JSON.stringify(message_config))
+    
+    try {
+
+        if(idGenero == '' || idGenero == null || idGenero == undefined || isNaN(idGenero)) {
+
+            message.ERROR_BAD_REQUEST.field = '[ID] INVALIDO'
+            return message.ERROR_BAD_REQUEST
+
+        }else{
+
+            let result = await filmeGeneroDAO.selectByIdFilme(id)
+
+            if(result) {
+                if(result.length > 0) {
+
+                    message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
+                    message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
+                    message.DEFAULT_MESSAGE.response.genero = result
+
+                    return message.DEFAULT_MESSAGE
+                }else {
+                    return message.ERROR_NOT_FOUND
+                }
+            }else {
+                return message.ERROR_INTERNAL_SERVER_MODEL
+            }
+        }
+        
+    } catch (error) {
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER
+    }
+}
+
+// DELETE
+const excluirFilmeGenero = async function(id) {
+
+    let message = JSON.parse(JSON.stringify(message_config))
+    
+    try {
+
+        let resultValidarID = await buscarFilmeGenero(id)
 
         if(resultValidarID.status) {
 
-            let result = await nacionalidadeDAO.deleteNacionalidade(id)
+            let result = await filmeGeneroDAO.deleteFilmeGenero(id)
 
             if(result) {
                 message.DEFAULT_MESSAGE.status = message.SUCESS_DELETE_ITEM.status
@@ -203,11 +272,13 @@ const excluirNacionalidade = async function(id) {
 }
 
 
-// EXPORT FINAL
+// EXPORT FINAL (COMMONJS)
 module.exports = {
-    inserirNovaNacionalidade,
-    atualizarNacionalidade,
-    excluirNacionalidade,
-    buscarNacionalidade,
-    listarNacionalidades
+    inserirFilmeGenero,
+    atualizarFilmeGenero,
+    excluirFilmeGenero,
+    buscarFilmeGenero,
+    listarFilmeGeneros,
+    buscarFilmeIdGenero,
+    buscarGeneroIdFilme
 }

@@ -23,6 +23,11 @@ create table tbl_filme(
     
 );
 
+alter table tbl_filme 
+add constraint FK_GENERO_FILME
+foreign key (id_genero)
+references tbl_genero(id);
+
 
 CREATE TABLE tbl_personagem (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -47,6 +52,26 @@ CREATE TABLE tbl_genero (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(45) NOT NULL
 );
+
+CREATE TABLE tbl_genero (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE tbl_filme_genero (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id_filme int NOT NULL,
+    id_genero int NOT NULL,
+    
+    constraint FK_FILME_FILMEGENERO
+   foreign key (id_filme)
+   references tbl_filme(id),
+   
+   constraint FK_GENERO_FILMEGENERO
+   foreign key (id_genero)
+   references tbl_genero(id)
+);
+
 
 
 CREATE TABLE tbl_classificacao (
