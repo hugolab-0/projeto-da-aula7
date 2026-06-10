@@ -9,8 +9,6 @@ const controller_classificacao = require('../classificacao/controller_classifica
 
 const controller_filme_genero = require('./controller_filme_genero.js')
 
-
-
 const inserirNovoFilme = async function (filme, contentType){
 
     let message = JSON.parse(JSON.stringify(message_config))
@@ -18,27 +16,34 @@ const inserirNovoFilme = async function (filme, contentType){
     try {
         if(String(contentType).includes('application/json')){
 
-            let validar = await validarDados(filme)
+           
 
+            let validar = await validarDados(filme)
+            console.log(validar)
             if(validar){
                 return validar
-            }else{
+            }else{ 
 
                 let result = await filmeDAO.insertFilme(filme)
+                console.log(result)
 
                 if(result){
                     filme.id = result
 
-                    for (const genero of filme.genero){
-                        let filmeGenero = {
-                            "id_filme" : filme.id, 
-                            "id_genero" : genero.id
-                        }
+                    if(filme.genero && filme.genero.length > 0){
 
-                        let resultInsertGenero = await controller_filme_genero.inserirFilmeGenero(filmeGenero)
-
-                        if(!resultInsertGenero.status){
-                            return message.SUCESS_CREATED_ITEM_WARNING
+                        for(const genero of filme.genero){
+                    
+                            let filmeGenero = {
+                                id_filme: filme.id,
+                                id_genero: genero.id
+                            }
+                    
+                            let resultInsertGenero = await controller_filme_genero.inserirFilmeGenero(filmeGenero)
+                                console.log(controller_filme_genero)
+                            if(!resultInsertGenero.status){
+                                return message.SUCESS_CREATED_ITEM_WARNING
+                            }
                         }
                     }
 
@@ -72,6 +77,7 @@ const atualizarFilme = async function (filme, id, contentType){
 
     try {
         //Validação do contente type para receber apenas Json
+    
         if(String(contentType).includes('application/json')){
 
             //Validação para o ID correto
@@ -100,11 +106,18 @@ const atualizarFilme = async function (filme, id, contentType){
 
                         if(resultDeleteGenero.status){
                             //Manipulação de todos os generos relacionados com o filme
-                            for (let genero of filme.generos) {
+                            for (let genero of filme.genero) {
                                 let filmeGenero = {
                                     "id_filme" : filme.id,
                                     "id_genero" : genero.id
                                 }
+
+                               //Chama a controller do filme genero para inserir os IDs
+                               let resultInsertGenero = await controller_filme_genero.inserirFilmeGenero(filmeGenero)
+
+                               if(!resultInsertGenero){
+                                return message.SUCESS_CREATED_ITEM_WARNING //201 com alerta de dados não inseridos
+                               }
                             }
                         }
 
@@ -280,6 +293,7 @@ const excluirFilme = async function(id){
 
 //Funcção para validar todos os dados de filmes (obrigatórios, qtde de caracteres, valor vazio, null, undefind)
 const validarDados = async function(filme) {
+    console.log(filme)
 
     let message = JSON.parse(JSON.stringify(message_config))
 
@@ -306,7 +320,7 @@ const validarDados = async function(filme) {
                 message.ERROR_BAD_RESQUEST.field = '[AVALIACAO] INVÁLIDA'
                 return message.ERROR_BAD_RESQUEST
         
-            }else if(filme.valor == '' || filme.valor == null || filme.valor.split('.')[0].length > 3 || isNaN(filme.valor)){
+            }else if(filme.valor == '' || filme.valor == null || String(filme.valor).split('.').length > 3 || isNaN(filme.valor)){
                 message.ERROR_BAD_RESQUEST.field = '[VALOR] INVÁLIDO'
                 return message.ERROR_BAD_RESQUEST
         
@@ -324,7 +338,7 @@ const validarDados = async function(filme) {
             }
 
     } catch (error) {
-        
+        console.log(error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }

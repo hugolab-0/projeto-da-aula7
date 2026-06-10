@@ -2,11 +2,11 @@
 const message_config = require('../modulo/configMessages.js')
 
 //Import do arquivo DAO para fazer o CRUD do filme no banco de dados
-const generoDAO = require('../../model/DAO/genero/genero.js')
+const nacionalidadeDAO = require('../../model/DAO/nacionalidade/nacionalidade.js')
 
 
 //Função para inserir um novo Sexo
-const inserirGenero = async function(genero, contentType) {
+const inserirNovaNacionalidade = async function(nacionalidade, contentType) {
 
     //Criando clone do objeto JSOn paea manipular a sua estrutura local sem modificar a estrutura original
     let message = JSON.parse(JSON.stringify(message_config))
@@ -14,22 +14,22 @@ const inserirGenero = async function(genero, contentType) {
     try {
         if(String(contentType).includes('application/json')){
 
-            let validar = await validarDados(genero)
+            let validar = await validarDados(nacionalidade)
 
 
             if(validar){
                 return validar
 
             }else{
-                let result = await generoDAO.insertNewGenero(genero)
+                let result = await nacionalidadeDAO.insertNewNacionalidade(nacionalidade)
 
                 if(result){ //201
 
-                    genero.id = result
+                    nacionalidade.id = result
                     message.DEFAULT_MESSAGE.status = message.SUCESS_CREATED_ITEM.status
                     message.DEFAULT_MESSAGE.status_code = message.SUCESS_CREATED_ITEM.status_code
                     message.DEFAULT_MESSAGE.message = message.SUCESS_CREATED_ITEM.message
-                    message.DEFAULT_MESSAGE.response = genero
+                    message.DEFAULT_MESSAGE.response = nacionalidade
 
                 }else {
                     return message.ERROR_INTERNAL_SERVER_MODEL //500 (model)
@@ -42,13 +42,12 @@ const inserirGenero = async function(genero, contentType) {
         }
         
     } catch (error) {
-        console.log(error);
-        
+
         return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500 (controller)
     }
 }
 
-const atualizarGenero = async function(genero, id, contentType) {
+const atualizarNacionalidade = async function(nacionalidade, id, contentType) {
 
      //Criando clone do objeto JSOn paea manipular a sua estrutura local sem modificar a estrutura original
     let message = JSON.parse(JSON.stringify(message_config))
@@ -59,24 +58,24 @@ const atualizarGenero = async function(genero, id, contentType) {
         if(String(contentType).includes('application/json')){
     
             //Validação para o ID correto
-            let resultBuscarID = await buscarGenero(id)
+            let resultBuscarID = await buscarNacionalidade(id)
     
             if(resultBuscarID.status){
-                let validar = await validarDados(genero)
+                let validar = await validarDados(nacionalidade)
     
                 //Validação de campos obrigatórios para a atualização (Body)
                 if(!validar){
                     //Adiciono o atributo ID do filme no Json para ser enviado ao DAO
-                    genero.id = id
+                    nacionalidade.id = id
     
     
-                    let result = await generoDAO.updateGenero(genero)
+                    let result = await nacionalidadeDAO.updateNacionalidade(nacionalidade)
     
                     if(result){
                         message.DEFAULT_MESSAGE.status = message.SUCESS_UPDATED_ITEM.status
                         message.DEFAULT_MESSAGE.status_code = message_config.SUCESS_UPDATED_ITEM.status_code
                         message.DEFAULT_MESSAGE.message = message.SUCESS_UPDATED_ITEM.message
-                        message.DEFAULT_MESSAGE.response = genero
+                        message.DEFAULT_MESSAGE.response = nacionalidade
     
                         return message.DEFAULT_MESSAGE //200 (Atualizado)
                     }else{
@@ -93,17 +92,17 @@ const atualizarGenero = async function(genero, id, contentType) {
             return message.ERROR_CONTENT_TYPE //415
         }
     } catch (error) {
-        console.log('ERRO CONTROLLER atualizar genero:', error)
+        console.log('ERRO CONTROLLER atualizarSexo:', error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
 }
 
-const listarGenero = async function() {
+const listarNacionalidade = async function() {
     let message = JSON.parse(JSON.stringify(message_config))
 
     try {
       
-      let result = await generoDAO.selectAllGenero()
+      let result = await nacionalidadeDAO.selectAllNacionalidade()
 
       if(result){
 
@@ -111,7 +110,7 @@ const listarGenero = async function() {
               message.DEFAULT_MESSAGE.status = message.SUCESS_RESPONSE.status
               message.DEFAULT_MESSAGE.status_code = message.SUCESS_RESPONSE.status_code
               message.DEFAULT_MESSAGE.response.count = result.length
-              message.DEFAULT_MESSAGE.response.genero = result
+              message.DEFAULT_MESSAGE.response.sexo = result
 
               return message.DEFAULT_MESSAGE //200
 
@@ -124,12 +123,12 @@ const listarGenero = async function() {
       }
 
     } catch (error) {
-        console.error("Erro ao listar genero:", error.message);
+        console.error("Erro ao listar nacionalidade:", error.message);
       return message.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
 }
 
-const buscarGenero = async function(id) {
+const buscarNacionalidade = async function(id) {
     
     let message = JSON.parse(JSON.stringify(message_config))
     
@@ -141,7 +140,7 @@ const buscarGenero = async function(id) {
             return message.ERROR_BAD_RESQUEST //400
 
         }else{
-            let result = await generoDAO.selectByIdGenero(id)
+            let result = await nacionalidadeDAO.selectByIdNacionalidade(id)
     
             if(result){
                 if(result.length > 0){
@@ -159,22 +158,22 @@ const buscarGenero = async function(id) {
             }
         }
     } catch (error) {
-        console.log('ERRO CONTROLLER buscarGenero:', error)
+        console.log('ERRO CONTROLLER buscar Nacionalidade:', error)
         return message.ERROR_INTERNAL_SERVER_CONTROLLER //500
     }
 }
 
-const excluirGenero = async function(id) {
+const excluirNacionalidade = async function(id) {
      let message = JSON.parse(JSON.stringify(message_config))
         
             try {
                 //Validação do erro 400 e 404
-                let resultBuscarID = await buscarGenero(id)
+                let resultBuscarID = await buscarNacionalidade(id)
         
                 //Validação para verificar se o status é verdadeiro é verdadeiro (se existe o filme)
                 if(resultBuscarID.status){
                     //Chamar função do DAO para excluir o fime
-                    let result = await generoDAO.deleteGenero(id)
+                    let result = await nacionalidadeDAO.deleteNacionalidade(id)
         
                     if(result){
                         return message.SUCESS_DELETED_ITEM //200 (Registro exluído)
@@ -191,12 +190,12 @@ const excluirGenero = async function(id) {
             }
 }
 
-const validarDados = async function(genero) {
+const validarDados = async function(nacionalidade) {
 
     let message = JSON.parse(JSON.stringify(message_config))
 
     try {
-        if (genero.nome === undefined || genero.nome === '' || genero.nome === null) {
+        if (nacionalidade.nacionalidade === undefined || nacionalidade.nacionalidade === '' || nacionalidade.nacionalidade === null) {
             return message_config.ERROR_REQUIRED_FIELDS // 400
         }
         return false
@@ -208,10 +207,10 @@ const validarDados = async function(genero) {
 }
 
 module.exports = {
-    inserirGenero,
-    atualizarGenero,
-    listarGenero,
-    buscarGenero,
-    excluirGenero,
+    inserirNovaNacionalidade,
+    atualizarNacionalidade,
+    listarNacionalidade,
+    buscarNacionalidade,
+    excluirNacionalidade,
     validarDados
 }

@@ -124,30 +124,19 @@ const selectByIdFilme = async function(id) {
 }
 
 //Função para excluir um filme pelo ID
-// Função responsável por deletar um filme
 const deleteFilme = async function(id) {
-
     try {
-        // remove o filme da tabela principal
-        let sql = `
-            delete from tbl_filme
-            where id = ${id}
-        `
-
+        let sql = `delete from tbl_filme where id = ${id}`
+    
         let result = await knexConex.raw(sql)
-
-        // Verifica se o delete foi executado
+        
         if(result){
             return true
         }else{
             return false
         }
-
+        
     } catch (error) {
-
-        // Exibe o erro no terminal
-        console.log(error)
-
         return false
     }
 }
@@ -159,5 +148,3 @@ module.exports = {
     selectByIdFilme,
     deleteFilme
 }
-
-

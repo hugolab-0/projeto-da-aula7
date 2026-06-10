@@ -50,54 +50,57 @@ const inserirNovaClassificacao = async function(classificacao, contentType) {
 //Funcção para atualizar um personagem
 const atualizarClassificacao = async function(classificacao, id, contentType){
 
-    //Criando clone do objeto JSOn paea manipular a sua estrutura local sem modificar a estrutura original
     let message = JSON.parse(JSON.stringify(message_config))
    
     try {
-        //Validação do contente type para receber apenas Json
 
         if(String(contentType).includes('application/json')){
 
-            //Validação para o ID correto
             let resultBuscarID = await buscarClassificacao(id)
 
             if(resultBuscarID.status){
+
                 let validar = await validarDados(classificacao)
 
-                //Validação de campos obrigatórios para a atualização (Body)
                 if(!validar){
-                    //Adiciono o atributo ID do filme no Json para ser enviado ao DAO
-                    personagem.id = id
 
+                    // CORREÇÃO
+                    classificacao.id = id
 
                     let result = await classificacaoDAO.updateClassification(classificacao)
 
                     if(result){
+
                         message.DEFAULT_MESSAGE.status = message.SUCESS_UPDATED_ITEM.status
-                        message.DEFAULT_MESSAGE.status_code = message_config.SUCESS_UPDATED_ITEM.status_code
+                        message.DEFAULT_MESSAGE.status_code = message.SUCESS_UPDATED_ITEM.status_code
                         message.DEFAULT_MESSAGE.message = message.SUCESS_UPDATED_ITEM.message
                         message.DEFAULT_MESSAGE.response = classificacao
 
-                        return message.DEFAULT_MESSAGE //200 (Atualizado)
+                        return message.DEFAULT_MESSAGE
+
                     }else{
-                        return message.ERROR_INTERNAL_SERVER_MODEL //500 (Model)
+                        return message.ERROR_INTERNAL_SERVER_MODEL
                     }
 
                 }else{
-                    return validar //400
+                    return validar
                 }
+
             }else{
-                return resultBuscarID //400 ou 404 ou 500
+                return resultBuscarID
             }
+
         }else{
-            return message.ERROR_CONTENT_TYPE //415
+            return message.ERROR_CONTENT_TYPE
         }
+
     } catch (error) {
+
         console.log('ERRO CONTROLLER atualizarClassificacao:', error)
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER //500
+
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER
     }
 }
-
 
 const listarClassificacoes = async function() {
     

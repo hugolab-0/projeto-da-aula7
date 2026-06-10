@@ -1,6 +1,4 @@
 // Import do arquivo de padronização de mensagens JSON (status codes, mensagens de erro e sucesso)
-
-
 const message_config = require('../modulo/configMessages.js')
 
 // Import do arquivo DAO responsável por executar as queries no banco de dados MySQL
